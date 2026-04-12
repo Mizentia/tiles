@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>টাইলস কন্ট্রাক্টর হিসাব</title>
+    <!-- Tailwind CSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Component CSS -->
+    <link rel="stylesheet" href="css/style.css">
+    
+    <!-- Firebase SDK Compat versions for CORS-safe local viewing -->
+    <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore-compat.js"></script>
+</head>
+<body class="text-gray-800 antialiased">
+    <!-- Initial Loading indicator -->
+    <div id="loading-screen" class="fixed inset-0 bg-white z-50 flex flex-col items-center justify-center">
+        <i class="fas fa-spinner fa-spin text-4xl text-blue-500 mb-4"></i>
+        <h2 class="text-xl font-semibold text-gray-700">সিস্টেম লোড হচ্ছে...</h2>
+        <p class="text-gray-500 mt-2">ফায়ারবেস ডাটাবেসের সাথে কানেক্ট করা হচ্ছে</p>
+    </div>
+
+    <!-- Main Container where components inject -->
+    <div id="root"></div>
+
+    <!-- Global Toast Notification UI -->
+    <div id="toast" class="fixed bottom-5 right-5 transform translate-y-20 opacity-0 transition-all duration-300 bg-gray-800 text-white px-4 py-3 rounded shadow-lg flex items-center z-50">
+        <i id="toast-icon" class="fas fa-check-circle text-green-400 mr-2"></i>
+        <span id="toast-msg">সফলভাবে সেভ হয়েছে!</span>
+    </div>
+
+    <!-- 1. Context and configurations -->
+    <script src="js/state.js"></script>
+    <script src="js/utils.js"></script>
+    
+    <!-- 2. HTML Templates -->
+    <script src="js/templates/layout.js"></script>
+    <script src="js/templates/dashboard.js"></script>
+    <script src="js/templates/works.js"></script>
+    <script src="js/templates/payments.js"></script>
+    
+    <!-- 3. UI logic and rendering -->
+    <script src="js/ui/navigation.js"></script>
+    <script src="js/ui/render-dash.js"></script>
+    <script src="js/ui/render-works.js"></script>
+    <script src="js/ui/render-payments.js"></script>
+    <script src="js/ui/works-logic.js"></script>
+    <script src="js/ui/payments-logic.js"></script>
+    <script src="js/ui/edit-modal.js"></script>
+    <script src="js/events.js"></script>
+
+    <!-- 4. Database logic -->
+    <script src="js/firebase/config.js"></script>
+    <script src="js/firebase/operations.js"></script>
+    
+    <!-- 5. Application initialization -->
+    <script src="js/main.js"></script>
+</body>
+</html>
