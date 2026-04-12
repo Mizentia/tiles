@@ -1,6 +1,10 @@
 window.RenderWorks = function() {
+    const listContainer = document.getElementById('works-list-container');
+    if (!listContainer) return;
+    
+    if(!document.getElementById('works-table-body')) listContainer.innerHTML = window.TemplateWorksList;
+
     const tbody = document.getElementById('works-table-body');
-    if (!tbody) return;
     tbody.innerHTML = '';
     
     const totalWork = AppState.worksData.reduce((sum, item) => sum + (Number(item.total) || 0), 0);
@@ -13,30 +17,33 @@ window.RenderWorks = function() {
 
     AppState.worksData.forEach(work => {
         const tr = document.createElement('tr');
-        tr.className = "hover:bg-gray-50 transition";
-        let calcDetails = '';
+        tr.className = "hover:bg-blue-50 transition cursor-pointer";
+        tr.onclick = (e) => {
+            if(!e.target.closest('.btn-delete-work') && !e.target.closest('.btn-edit-work')) window.ShowWorkModal(work);
+        };
         
-        if (work.measureType === 'sqft' && work.lFt !== undefined) {
-            calcDetails = `<div class="text-xs text-indigo-500 mt-1">L: ${work.lFt}' ${work.lIn}" × W: ${work.wFt}' ${work.wIn}" = ${work.qty} sqft</div>`;
-        } else if (work.measureType === 'rft' && work.lFt !== undefined) {
-            calcDetails = `<div class="text-xs text-emerald-500 mt-1">L: ${work.lFt}' ${work.lIn}" = ${work.qty} rft</div>`;
-        } else {
-            calcDetails = `<div class="text-xs text-gray-500 mt-1">পরিমাণ: ${work.qty}</div>`;
+        let summary = "পুরাতন হিসাব";
+        if(work.floors && work.floors.length) {
+            summary = work.floors.map(f => f.name || "তলা").join(', ') + ` (${work.floors.reduce((acc, f)=>acc+f.items.length,0)}টি কাজ)`;
+        } else if (work.workType) {
+            summary = work.workType;
+        }
+
+        let dateStr = work.date || "অজ্ঞাত তারিখ";
+        if(work.dateStart) {
+            dateStr = work.dateStart === work.dateEnd ? Utils.formatDate(work.dateStart) : `${Utils.formatDate(work.dateStart)} - ${Utils.formatDate(work.dateEnd)}`;
+        } else if(work.date) {
+            dateStr = Utils.formatDate(work.date);
         }
 
         tr.innerHTML = `
-            <td class="p-3 border-b whitespace-nowrap align-top">${Utils.formatDate(work.date)}</td>
-            <td class="p-3 border-b align-top">
-                <span class="font-medium text-gray-700">${work.workType}</span>
-                ${calcDetails}
-            </td>
-            <td class="p-3 border-b text-gray-600 text-xs md:text-sm align-top text-center">
-                ৳${work.rate} <br>x ${work.qty}
-            </td>
-            <td class="p-3 border-b text-right font-semibold text-indigo-700 align-top whitespace-nowrap">৳ ${Utils.formatCurrency(work.total)}</td>
+            <td class="p-3 border-b whitespace-nowrap align-top">${dateStr}</td>
+            <td class="p-3 border-b align-top font-medium text-gray-700">${summary}</td>
+            <td class="p-3 border-b text-center align-top text-red-500">৳ ${Utils.formatCurrency(work.laborCost || 0)}</td>
+            <td class="p-3 border-b text-right font-bold text-indigo-700 align-top whitespace-nowrap">৳ ${Utils.formatCurrency(work.total || 0)}</td>
             <td class="p-3 border-b text-center align-top whitespace-nowrap">
-                <button data-id="${work.id}" class="btn-edit-work text-blue-400 hover:text-blue-600 p-1 transition mr-2" title="এডিট করুন"><i class="fas fa-edit pointer-events-none"></i></button>
-                <button data-id="${work.id}" class="btn-delete-work text-red-400 hover:text-red-600 p-1 transition" title="মুছে ফেলুন"><i class="fas fa-trash pointer-events-none"></i></button>
+                <button data-id="${work.id}" class="btn-edit-work relative text-emerald-500 hover:text-emerald-700 p-1 mr-2 transition" title="এডিট করুন"><i class="fas fa-edit pointer-events-none"></i></button>
+                <button data-id="${work.id}" class="btn-delete-work relative text-red-400 hover:text-red-600 p-1 transition" title="মুছে ফেলুন"><i class="fas fa-trash pointer-events-none"></i></button>
             </td>
         `;
         tbody.appendChild(tr);

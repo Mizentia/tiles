@@ -2,10 +2,10 @@ document.addEventListener('DOMContentLoaded', () => {
     // Inject Modular HTML Components
     document.getElementById('root').innerHTML = window.TemplateLayout;
     document.getElementById('main-content').innerHTML = 
-        window.TemplateDashboard + window.TemplateWorks + window.TemplatePayments;
+        window.TemplateDashboard + window.TemplateWorksBase + window.TemplatePayments;
 
-    // Prefill date inputs
-    document.getElementById('work-date').value = AppState.todayStr;
+    let d1 = document.getElementById('work-start-date'); if(d1) d1.value = AppState.todayStr;
+    let d2 = document.getElementById('work-end-date'); if(d2) d2.value = AppState.todayStr;
     document.getElementById('pay-date').value = AppState.todayStr;
 
     // Setup User Interface
