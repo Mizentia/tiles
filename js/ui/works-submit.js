@@ -10,15 +10,26 @@ window.SetupWorksSubmit = function() {
         const dateStart = document.getElementById('work-start-date').value || AppState.todayStr;
         const dateEnd = document.getElementById('work-end-date').value || dateStart;
 
-        const workers = Array.from(document.querySelectorAll('.worker-row')).map(row => ({
-            name: row.querySelector('.worker-name').value,
-            phone: row.querySelector('.worker-phone').value,
-            role: row.querySelector('.worker-role').value,
-            location: row.querySelector('.worker-location').value,
-            rate: parseFloat(row.querySelector('.worker-rate').value) || 0,
-            paid: parseFloat(row.querySelector('.worker-paid').value) || 0,
-            due: parseFloat(row.querySelector('.worker-due').value) || 0
-        }));
+        const workers = [];
+        for(let row of Array.from(document.querySelectorAll('.worker-row'))) {
+            const dbId = row.querySelector('.worker-db-id') ? row.querySelector('.worker-db-id').value : '';
+            const wData = {
+                name: row.querySelector('.worker-name').value,
+                phone: row.querySelector('.worker-phone').value,
+                role: row.querySelector('.worker-role').value,
+                location: row.querySelector('.worker-location').value
+            };
+            if(wData.name || wData.phone) {
+                if(dbId) db.collection('workers').doc(dbId).update(wData).catch(e=>console.log(e));
+                else db.collection('workers').add({...wData, createdAt: firebase.firestore.FieldValue.serverTimestamp()}).catch(e=>console.log(e));
+            }
+            workers.push({
+                ...wData,
+                rate: parseFloat(row.querySelector('.worker-rate').value) || 0,
+                paid: parseFloat(row.querySelector('.worker-paid').value) || 0,
+                due: parseFloat(row.querySelector('.worker-due').value) || 0
+            });
+        }
 
         const floors = Array.from(document.querySelectorAll('.floor-block')).map(block => ({
             name: block.querySelector('.floor-name').value,

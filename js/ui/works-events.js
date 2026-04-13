@@ -22,6 +22,9 @@ window.SetupWorksEvents = function() {
         if(e.target.classList.contains('calc-trigger') || e.target.id === 'malik-received') {
             window.WS.recalcAll();
         }
+        if(e.target.classList.contains('worker-field')) {
+            window.WorkerSelectHandler.onFieldChange(e.target.closest('.worker-row'));
+        }
     });
 
     form.addEventListener('change', (e) => {
@@ -38,32 +41,30 @@ window.SetupWorksEvents = function() {
     });
 
     form.addEventListener('click', (e) => {
-        if(e.target.closest('.btn-remove-worker')) {
-            e.target.closest('.worker-row').remove(); window.WS.recalcAll();
-        } else if(e.target.closest('.btn-remove-floor')) {
-            e.target.closest('.floor-block').remove(); window.WS.recalcAll();
-        } else if(e.target.closest('.btn-add-item')) {
-            const btn = e.target.closest('.btn-add-item');
-            document.getElementById(`items-${btn.dataset.floor}`).insertAdjacentHTML('beforeend', window.TemplateFloorItem(btn.dataset.floor, window.WS.genId()));
-        } else if(e.target.closest('.btn-remove-item')) {
-            e.target.closest('.floor-item').remove(); window.WS.recalcAll();
-        } else if(e.target.closest('#btn-cancel-edit')) {
+        const el = e.target;
+        if(el.closest('.btn-remove-worker')) { el.closest('.worker-row').remove(); window.WS.recalcAll(); }
+        else if(el.closest('.btn-remove-floor')) { el.closest('.floor-block').remove(); window.WS.recalcAll(); }
+        else if(el.closest('.btn-remove-item')) { el.closest('.floor-item').remove(); window.WS.recalcAll(); }
+        else if(el.closest('.btn-remove-expense')) { el.closest('.expense-row').remove(); window.WS.recalcAll(); }
+        else if(el.closest('.btn-cancel-worker-update')) {
+            window.WorkerSelectHandler.onCancel(el.closest('.worker-row'));
+        } else if(el.closest('.btn-add-item')) {
+            const b = el.closest('.btn-add-item');
+            document.getElementById(`items-${b.dataset.floor}`).insertAdjacentHTML('beforeend', window.TemplateFloorItem(b.dataset.floor, window.WS.genId()));
+        } else if(el.closest('#btn-add-expense')) {
+            document.getElementById('expenses-list-ui').insertAdjacentHTML('beforeend', window.TemplateExpenseRow(window.WS.genId()));
+            window.WS.updateExpenseCheckboxes();
+        } else if(el.closest('#btn-cancel-edit')) {
             form.reset();
             document.getElementById('workers-list-ui').innerHTML = '';
             document.getElementById('floors-list-ui').innerHTML = '';
             window.WS.currentEditId = null;
-            const btnSave = document.getElementById('btn-save-work');
-            btnSave.classList.replace('bg-emerald-600', 'bg-blue-600');
-            btnSave.classList.replace('hover:bg-emerald-700', 'hover:bg-blue-700');
-            btnSave.innerHTML = '<i class="fas fa-save mr-1"></i> সেভ করুন';
+            const bS = document.getElementById('btn-save-work');
+            bS.className = bS.className.replace('bg-emerald-600', 'bg-blue-600').replace('hover:bg-emerald-700', 'hover:bg-blue-700');
+            bS.innerHTML = '<i class="fas fa-save mr-1"></i> সেভ করুন';
             document.getElementById('btn-cancel-edit').classList.add('hidden');
             document.getElementById('expenses-list-ui').innerHTML = '';
             window.WS.recalcAll();
-        } else if(e.target.closest('#btn-add-expense')) {
-            document.getElementById('expenses-list-ui').insertAdjacentHTML('beforeend', window.TemplateExpenseRow(window.WS.genId()));
-            window.WS.updateExpenseCheckboxes();
-        } else if(e.target.closest('.btn-remove-expense')) {
-            e.target.closest('.expense-row').remove(); window.WS.recalcAll();
         }
     });
 
@@ -78,6 +79,13 @@ window.SetupWorksEvents = function() {
                 selectionDiv.style.display = 'none';
             }
             window.WS.recalcAll();
+        }
+        
+        if(e.target.classList.contains('worker-select-db')) {
+            window.WorkerSelectHandler.onSelect(e.target.closest('.worker-row'), e.target.value);
+        }
+        if(e.target.classList.contains('worker-field')) {
+            window.WorkerSelectHandler.onFieldChange(e.target.closest('.worker-row'));
         }
     });
 };

@@ -33,5 +33,10 @@ window.FBListeners = {
             window.RenderWorks();
             window.RenderPayments();
         });
+
+        db.collection('workers').onSnapshot((snapshot) => {
+            AppState.workersData = [];
+            snapshot.forEach((doc) => AppState.workersData.push({ id: doc.id, ...doc.data() }));
+        });
     }
 };

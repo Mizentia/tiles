@@ -1,11 +1,27 @@
-window.TemplateWorkerRow = (id) => `
+window.TemplateWorkerRow = (id) => {
+    let options = '<option value="">+ নতুন মিস্ত্রি/লেবার যুক্ত করুন</option>';
+    if (window.AppState && window.AppState.workersData) {
+        window.AppState.workersData.forEach(w => {
+            options += `<option value="${w.id}">${w.name} (${w.role === 'Helper' ? 'হেল্পার' : 'মিস্ত্রি'} - ${w.phone || 'নম্বর নেই'})</option>`;
+        });
+    }
+
+    return `
 <div class="worker-row bg-gray-50 border border-gray-200 rounded p-3 mb-3 relative" data-id="${id}">
+    <input type="hidden" class="worker-db-id" value="">
     <button type="button" class="btn-remove-worker absolute top-2 right-2 text-red-500 hover:text-red-700 p-1"><i class="fas fa-times pointer-events-none"></i></button>
+    <div class="mb-3">
+        <label class="text-xs text-gray-600 block mb-1">আগে যুক্ত করা লোক সিলেক্ট করুন (অথবা নিচে নতুন যুক্ত করুন)</label>
+        <select class="w-full border rounded px-2 py-1 text-sm bg-white worker-select-db text-indigo-700 font-medium">
+            ${options}
+        </select>
+        <button type="button" class="btn-cancel-worker-update hidden mt-1 text-xs text-orange-600 underline hover:text-orange-800"><i class="fas fa-undo mr-1 pointer-events-none"></i>আপডেট বাতিল করুন (আগের তথ্য ফিরিয়ে আনুন)</button>
+    </div>
     <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <div><label class="text-xs text-gray-600">নাম</label><input type="text" class="w-full border rounded px-2 py-1 text-sm worker-name" placeholder="নাম"></div>
-        <div><label class="text-xs text-gray-600">ফোন নম্বর</label><input type="text" class="w-full border rounded px-2 py-1 text-sm worker-phone" placeholder="০১৭..."></div>
-        <div><label class="text-xs text-gray-600">ধরণ</label><select class="w-full border rounded px-2 py-1 text-sm worker-role"><option value="Mistri">মিস্ত্রি</option><option value="Helper">হেল্পার</option></select></div>
-        <div><label class="text-xs text-gray-600">ঠিকানা</label><input type="text" class="w-full border rounded px-2 py-1 text-sm worker-location" placeholder="ঠিকানা"></div>
+        <div><label class="text-xs text-gray-600">নাম</label><input type="text" class="w-full border rounded px-2 py-1 text-sm worker-name worker-field" placeholder="নাম"></div>
+        <div><label class="text-xs text-gray-600">ফোন নম্বর</label><input type="text" class="w-full border rounded px-2 py-1 text-sm worker-phone worker-field" placeholder="০১৭..."></div>
+        <div><label class="text-xs text-gray-600">ধরণ</label><select class="w-full border rounded px-2 py-1 text-sm worker-role worker-field"><option value="Mistri">মিস্ত্রি</option><option value="Helper">হেল্পার</option></select></div>
+        <div><label class="text-xs text-gray-600">ঠিকানা</label><input type="text" class="w-full border rounded px-2 py-1 text-sm worker-location worker-field" placeholder="ঠিকানা"></div>
     </div>
     <div class="grid grid-cols-3 gap-3 mt-3">
         <div><label class="text-xs text-gray-600">দৈনিক রেট/হাজিরা (৳)</label>
@@ -16,6 +32,7 @@ window.TemplateWorkerRow = (id) => `
     </div>
 </div>
 `;
+};
 window.TemplateWorkersContainer = `
 <div class="border-t pt-2">
     <div class="flex justify-between items-center mb-3">
