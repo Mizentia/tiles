@@ -1,7 +1,18 @@
-/* Custom CSS */
+/* Contactor Hisab Khata - Custom Styles */
 body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f3f4f6; }
-.tab-btn.active { border-bottom: 2px solid #3b82f6; color: #3b82f6; }
-/* Hide scrollbar for clean UI */
+
+/* Tab Active Colors per section */
+.tab-btn { border-bottom: 2px solid transparent; transition: color 0.2s, border-color 0.2s; }
+#tab-dashboard.active  { color: #2563eb; border-color: #2563eb; background: #eff6ff; }
+#tab-quotation.active  { color: #7c3aed; border-color: #7c3aed; background: #f5f3ff; }
+#tab-works.active      { color: #1d4ed8; border-color: #1d4ed8; background: #eff6ff; }
+#tab-workers.active    { color: #0d9488; border-color: #0d9488; background: #f0fdfa; }
+#tab-payments.active   { color: #059669; border-color: #059669; background: #ecfdf5; }
+
+/* Smooth hover on cards */
+.floor-item:hover, .qt-item:hover { box-shadow: 0 2px 8px rgba(99,102,241,0.12); }
+
+/* Scrollbar */
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: #f1f1f1; }
 ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }

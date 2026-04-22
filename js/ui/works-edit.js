@@ -22,6 +22,35 @@ window.LoadWorkForEdit = function(id) {
             const wId = window.WS.genId();
             wContainer.insertAdjacentHTML('beforeend', window.TemplateWorkerRow(wId));
             const row = wContainer.lastElementChild;
+
+            // ── KEY FIX ──────────────────────────────────────────────────────
+            // Determine the DB id for this worker.
+            // Priority: w.dbId (explicitly stored) → match by name+phone in workersData
+            let resolvedDbId = w.dbId || '';
+            if (!resolvedDbId && window.AppState && window.AppState.workersData) {
+                const match = window.AppState.workersData.find(
+                    x => x.name === w.name && (x.phone === w.phone || (!x.phone && !w.phone))
+                );
+                if (match) resolvedDbId = match.id;
+            }
+
+            // Set the hidden field so submit logic knows this is an existing worker
+            row.querySelector('.worker-db-id').value = resolvedDbId;
+
+            // Pre-select the dropdown so the user sees the correct person selected
+            if (resolvedDbId) {
+                const sel = row.querySelector('.worker-select-db');
+                if (sel) sel.value = resolvedDbId;
+                // Store originals so onFieldChange can show the "cancel update" button
+                if (window.WorkerSelectHandler) {
+                    window.WorkerSelectHandler._originals[wId] = {
+                        name: w.name || '', phone: w.phone || '',
+                        role: w.role || 'Mistri', location: w.location || ''
+                    };
+                }
+            }
+            // ─────────────────────────────────────────────────────────────────
+
             row.querySelector('.worker-name').value = w.name || '';
             row.querySelector('.worker-phone').value = w.phone || '';
             row.querySelector('.worker-role').value = w.role || 'Mistri';

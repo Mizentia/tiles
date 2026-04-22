@@ -12,19 +12,31 @@ window.SetupWorksSubmit = function() {
 
         const workers = [];
         for(let row of Array.from(document.querySelectorAll('.worker-row'))) {
-            const dbId = row.querySelector('.worker-db-id') ? row.querySelector('.worker-db-id').value : '';
+            let dbId = row.querySelector('.worker-db-id') ? row.querySelector('.worker-db-id').value : '';
             const wData = {
                 name: row.querySelector('.worker-name').value,
                 phone: row.querySelector('.worker-phone').value,
                 role: row.querySelector('.worker-role').value,
-                location: row.querySelector('.worker-location').value
+                location: row.querySelector('.worker-location').value,
+                dailyRate: parseFloat(row.querySelector('.worker-rate').value) || 0
             };
             if(wData.name || wData.phone) {
+                // ── KEY FIX ──────────────────────────────────────────────────────
+                // If no dbId, try to find this worker by name+phone in the master list
+                // to avoid creating a duplicate entry.
+                if (!dbId && window.AppState && window.AppState.workersData) {
+                    const match = window.AppState.workersData.find(
+                        x => x.name === wData.name && (x.phone === wData.phone || (!x.phone && !wData.phone))
+                    );
+                    if (match) dbId = match.id;
+                }
+                // ───────────────────────────────────────────────────────────────
                 if(dbId) db.collection('workers').doc(dbId).update(wData).catch(e=>console.log(e));
                 else db.collection('workers').add({...wData, createdAt: firebase.firestore.FieldValue.serverTimestamp()}).catch(e=>console.log(e));
             }
             workers.push({
                 ...wData,
+                dbId: dbId || '', // always store resolved dbId for future edits
                 rate: parseFloat(row.querySelector('.worker-rate').value) || 0,
                 paid: parseFloat(row.querySelector('.worker-paid').value) || 0,
                 due: parseFloat(row.querySelector('.worker-due').value) || 0
@@ -69,9 +81,28 @@ window.SetupWorksSubmit = function() {
             netProfit: parseFloat(document.getElementById('calc-profit').innerText.replace(/[^\d.-]/g, '') || 0)
         };
 
+        // Capture editId BEFORE clearing it so sync can exclude the old record
+        const editId = window.WS.currentEditId || null;
+
         let success = false;
-        if(window.WS.currentEditId) {
-            success = await window.FBOperations.updateDocument('works', window.WS.currentEditId, data);
+        if(editId) {
+            const oldWork = (window.AppState && window.AppState.worksData) ? window.AppState.worksData.find(w => w.id === editId) : null;
+            const oldPaymentId = oldWork ? oldWork.paymentId : null;
+
+            if (oldPaymentId) {
+                 if (data.malikPaid > 0) {
+                     await db.collection('payments').doc(oldPaymentId).update({ amount: data.malikPaid, date: dateEnd, note: `কাজের বিল থেকে (আপডেট)` }).catch(e=>console.log(e));
+                     data.paymentId = oldPaymentId;
+                 } else {
+                     await db.collection('payments').doc(oldPaymentId).delete().catch(e=>console.log(e));
+                     data.paymentId = null;
+                 }
+            } else if (data.malikPaid > 0) {
+                 const pRef = await db.collection('payments').add({ amount: data.malikPaid, date: dateEnd, note: `কাজের বিল থেকে`, createdAt: firebase.firestore.FieldValue.serverTimestamp() }).catch(e=>console.log(e));
+                 if (pRef) data.paymentId = pRef.id;
+            }
+
+            success = await window.FBOperations.updateDocument('works', editId, data);
             if(success) {
                 window.WS.currentEditId = null;
                 btn.classList.replace('bg-emerald-600', 'bg-blue-600');
@@ -79,10 +110,17 @@ window.SetupWorksSubmit = function() {
                 document.getElementById('btn-cancel-edit').classList.add('hidden');
             }
         } else {
+            if (data.malikPaid > 0) {
+                const pRef = await db.collection('payments').add({ amount: data.malikPaid, date: dateEnd, note: `কাজের বিল থেকে`, createdAt: firebase.firestore.FieldValue.serverTimestamp() }).catch(e=>console.log(e));
+                if (pRef) data.paymentId = pRef.id;
+            }
             success = await window.FBOperations.addWork(data, btn);
         }
 
         if (success) {
+            // ── Sync worker totals to their individual profiles ──────────────
+            if (window.SyncWorkerStats) window.SyncWorkerStats(data, editId);
+            // ─────────────────────────────────────────────────────────────────
             e.target.reset();
             document.getElementById('workers-list-ui').innerHTML = '';
             document.getElementById('floors-list-ui').innerHTML = '';

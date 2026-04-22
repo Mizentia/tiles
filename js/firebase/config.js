@@ -37,6 +37,8 @@ window.FBListeners = {
         db.collection('workers').onSnapshot((snapshot) => {
             AppState.workersData = [];
             snapshot.forEach((doc) => AppState.workersData.push({ id: doc.id, ...doc.data() }));
+            AppState.workersData.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+            if (window.RenderWorkers) window.RenderWorkers();
         });
     }
 };

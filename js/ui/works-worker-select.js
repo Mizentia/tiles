@@ -9,12 +9,14 @@ window.WorkerSelectHandler = {
         if (dbId && window.AppState && window.AppState.workersData) {
             const w = window.AppState.workersData.find(x => x.id === dbId);
             if (w) {
-                const orig = { name: w.name||'', phone: w.phone||'', role: w.role||'Mistri', location: w.location||'' };
+                const orig = { name: w.name||'', phone: w.phone||'', role: w.role||'Mistri', location: w.location||'', dailyRate: w.dailyRate||0 };
                 this._originals[row.dataset.id] = orig;
                 row.querySelector('.worker-name').value     = orig.name;
                 row.querySelector('.worker-phone').value    = orig.phone;
                 row.querySelector('.worker-role').value     = orig.role;
                 row.querySelector('.worker-location').value = orig.location;
+                const rateEl = row.querySelector('.worker-rate');
+                if(rateEl) { rateEl.value = orig.dailyRate; rateEl.dispatchEvent(new Event('input', {bubbles: true})); }
                 if (cancelBtn) cancelBtn.classList.add('hidden');
             }
         } else {
@@ -22,6 +24,8 @@ window.WorkerSelectHandler = {
             row.querySelector('.worker-name').value     = '';
             row.querySelector('.worker-phone').value    = '';
             row.querySelector('.worker-location').value = '';
+            const rateEl = row.querySelector('.worker-rate');
+            if(rateEl) { rateEl.value = ''; rateEl.dispatchEvent(new Event('input', {bubbles: true})); }
             if (cancelBtn) cancelBtn.classList.add('hidden');
         }
     },
@@ -41,6 +45,8 @@ window.WorkerSelectHandler = {
         row.querySelector('.worker-phone').value    = orig.phone;
         row.querySelector('.worker-role').value     = orig.role;
         row.querySelector('.worker-location').value = orig.location;
+        const rateEl = row.querySelector('.worker-rate');
+        if(rateEl) { rateEl.value = orig.dailyRate; rateEl.dispatchEvent(new Event('input', {bubbles: true})); }
         const cancelBtn = row.querySelector('.btn-cancel-worker-update');
         if (cancelBtn) cancelBtn.classList.add('hidden');
     }

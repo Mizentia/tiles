@@ -7,8 +7,49 @@ window.RenderWorks = function() {
     const tbody = document.getElementById('works-table-body');
     tbody.innerHTML = '';
     
-    const totalWork = AppState.worksData.reduce((sum, item) => sum + (Number(item.total) || 0), 0);
+    let totalWork = 0;
+    let totalSqFt = 0;
+    let totalRFt = 0;
+    let totalPieces = 0;
+    let totalSqFtPrice = 0;
+    let totalRFtPrice = 0;
+    let totalPiecesPrice = 0;
+
+    AppState.worksData.forEach(work => {
+        totalWork += (Number(work.total) || 0);
+        (work.floors || []).forEach(f => {
+            (f.items || []).forEach(item => {
+                const qty = Number(item.qty) || 0;
+                const price = Number(item.total) || 0;
+                if(item.mType === 'sqft') {
+                    totalSqFt += qty;
+                    totalSqFtPrice += price;
+                } else if(item.mType === 'rft') {
+                    totalRFt += qty;
+                    totalRFtPrice += price;
+                } else if(item.mType === 'piece') {
+                    totalPieces += qty;
+                    totalPiecesPrice += price;
+                }
+            });
+        });
+    });
+
     document.getElementById('list-total-work').innerText = Utils.formatCurrency(totalWork);
+    
+    // Update detailed summary if elements exist
+    const elSqFt = document.getElementById('det-sqft');
+    if (elSqFt) {
+        elSqFt.innerText = totalSqFt.toFixed(2);
+        document.getElementById('det-rft').innerText = totalRFt.toFixed(2);
+        document.getElementById('det-total-ft').innerText = (totalSqFt + totalRFt).toFixed(2);
+        document.getElementById('det-piece').innerText = totalPieces.toFixed(2);
+        
+        document.getElementById('det-sqft-price').innerText = Utils.formatCurrency(totalSqFtPrice);
+        document.getElementById('det-rft-price').innerText = Utils.formatCurrency(totalRFtPrice);
+        document.getElementById('det-piece-price').innerText = Utils.formatCurrency(totalPiecesPrice);
+        document.getElementById('det-total-price').innerText = Utils.formatCurrency(totalSqFtPrice + totalRFtPrice + totalPiecesPrice);
+    }
 
     if (AppState.worksData.length === 0) {
         tbody.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-gray-500">কোনো কাজের হিসাব পাওয়া যায়নি।</td></tr>`;
